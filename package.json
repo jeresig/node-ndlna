@@ -1,0 +1,29 @@
+{
+  "name": "ndlna",
+  "version": "0.0.1",
+  "description": "Resolve names through the National Diet Library's Name Authority.",
+  "main": "ndlna.js",
+  "dependencies": {
+    "libxmljs": "~0.8.1",
+    "request": "~2.27.0",
+    "romaji-name": "~0.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jeresig/node-ndlna.git"
+  },
+  "keywords": [
+    "ja",
+    "japanese",
+    "name"
+  ],
+  "author": "John Resig <jeresig@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jeresig/node-ndlna/issues"
+  }
+}
