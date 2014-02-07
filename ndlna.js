@@ -16,6 +16,30 @@ var Record = function(id) {
 };
 
 Record.prototype = {
+    parseLabel: function(label) {
+        var names = {};
+
+        label.childNodes().forEach(function(node) {
+            var lang = node.attr("lang");
+            lang = lang ? lang.value() : "ja-Kanji";
+
+            var text = node.text().trim();
+
+            if (text) {
+                names[lang] = text.split(/, /).slice(0, 2).join(" ")
+                    .replace(/[ \d-]+$/, "");
+            }
+        });
+
+        var name = names["ja-Kanji"];
+
+        if (names["ja-Latn"]) {
+            name += " " + names["ja-Latn"];
+        }
+
+        return romajiName.parseName(name);
+    },
+
     loadData: function(callback) {
         if (this.loaded) {
             return callback();
@@ -33,28 +57,19 @@ Record.prototype = {
             var prefLabel = doc.get("//prefLabel/Description");
 
             if (prefLabel) {
-                var names = {};
-
-                prefLabel.childNodes().forEach(function(node) {
-                    var lang = node.attr("lang");
-                    lang = lang ? lang.value() : "ja-Kanji";
-
-                    var text = node.text().trim();
-
-                    if (text) {
-                        names[lang] = text.split(/, /).slice(0, 2).join(" ")
-                            .replace(/[ \d-]+$/, "");
-                    }
-                });
-
-                var name = names["ja-Kanji"];
-
-                if (names["ja-Latn"]) {
-                    name += " " + names["ja-Latn"];
-                }
-
-                this.name = romajiName.parseName(name);
+                this.name = this.parseLabel(prefLabel);
             }
+
+            this.aliases = [];
+
+            var altLabels = doc.find("//altLabel/Description");
+
+            altLabels.forEach(function(label) {
+                var name = this.parseLabel(label);
+                if (name.name) {
+                    this.aliases.push(name);
+                }
+            }.bind(this));
 
             var birth = doc.get("//dateOfBirth");
             var death = doc.get("//dateOfDeath");
