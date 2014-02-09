@@ -152,7 +152,7 @@ Search.prototype = {
             var ids = [];
 
             if (!err && res.statusCode === 200) {
-                ids = body.match(extractNDLNA).map(function(url) {
+                ids = (body.match(extractNDLNA) || []).map(function(url) {
                     return url.split("/")[1];
                 });
             }
