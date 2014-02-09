@@ -6,7 +6,9 @@
   "dependencies": {
     "libxmljs": "~0.8.1",
     "request": "~2.27.0",
-    "romaji-name": "~0.1.0"
+    "romaji-name": "~0.1.0",
+    "dirty": "~0.9.9",
+    "async": "~0.2.10"
   },
   "devDependencies": {},
   "scripts": {
