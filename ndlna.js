@@ -11,14 +11,17 @@ var ndlQueryURL = "http://id.ndl.go.jp/auth/ndla/?g=personalNames&qw=";
 var ndlnaURL = "http://id.ndl.go.jp/auth/ndlna/";
 var viafRedirectURL = "http://viaf.org/viaf/sourceID/NDL%7C";
 
-var extractNDLNA = /ndlna\/(\d+)/g;
+var extractNDLNA = "//li/a[contains(@href,'auth/ndlna')]";
 
 var searchCache;
 var recordCache = dirty(recordCacheFile);
 
-var Record = function(id) {
+var Record = function(id, label) {
     this.id = id;
     this.url = ndlnaURL + this.id;
+    if (label) {
+        this.label = label;
+    }
 };
 
 Record.prototype = {
@@ -139,8 +142,8 @@ Search.prototype = {
         var cached = searchCache.get(name);
 
         if (cached) {
-            this.results = cached.results.map(function(id) {
-                return new Record(id);
+            this.results = cached.results.map(function(match) {
+                return new Record(match.id, match.label);
             });
             callback(null, this);
             return;
@@ -149,19 +152,26 @@ Search.prototype = {
         // TODO: Figure out the SPARQL and run it through their API instead
         request(ndlQueryURL + encodeURIComponent(name), function(err, res, body) {
             var cache = {};
-            var ids = [];
+            var matches = [];
 
             if (!err && res.statusCode === 200) {
-                ids = (body.match(extractNDLNA) || []).map(function(url) {
-                    return url.split("/")[1];
+                body = body.replace(/xmlns=".*?"/, "");
+                var doc = libxmljs.parseXml(body);
+                var links = doc.find(extractNDLNA);
+                matches = links.map(function(link) {
+                    var url = link.attr("href").value();
+                    return {
+                        id: /\d+/.exec(url)[0],
+                        label: link.text()
+                    };
                 });
             }
 
-            this.results = ids.map(function(id) {
-                return new Record(id);
+            this.results = matches.map(function(match) {
+                return new Record(match.id, match.label);
             });
 
-            cache.results = ids;
+            cache.results = matches;
 
             searchCache.set(name, cache, function() {
                 callback(null, this);

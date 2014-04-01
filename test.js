@@ -4,9 +4,23 @@ var ndlna = require("./ndlna");
 
 ndlna.init(function() {
     console.log("init");
-    ndlna.searchByName("豊国 3世", function(err, search) {
+    // 豊国 3世
+    ndlna.searchByName("hiroshige", function(err, search) {
+        var filtered = search.results.filter(function(record) {
+            return /1[678]\d\d/.test(record.label);
+        });
+
+        var match;
+
+        if (filtered.length > 0) {
+            match = filtered[0];
+        } else if (search.results.length > 0) {
+            match = search.results[0];
+        }
+
         search.load(function() {
             console.log("DONE", search);
+            console.log("MATCH", match);
         });
     });
 });
