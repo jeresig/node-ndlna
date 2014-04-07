@@ -43,10 +43,11 @@ Record.prototype = {
         var name = names["ja-Kanji"];
 
         // Sometimes it ends with something like 江戸後期
-        name = name.replace(/(?:江戸|-\d+).*$/, "");
+        name = name.replace(/(?:江戸|文久|\S+頃|-\d+).*$/, "");
 
         if (names["ja-Latn"]) {
-            name += " " + names["ja-Latn"].replace(/ (?:Edo|-\d+).*$/, "");
+            name += " " + names["ja-Latn"]
+                .replace(/ (?:Edo|Bunkyu|\S+ goro|-\d+).*$/, "");
         }
 
         return romajiName.parseName(name);
