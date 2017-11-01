@@ -1,14 +1,14 @@
 {
   "name": "ndlna",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Resolve names through the National Diet Library's Name Authority.",
   "main": "ndlna.js",
   "dependencies": {
-    "async": "^1.5.0",
-    "dirty": "~0.9.9",
-    "libxmljs": "^0.15.0",
-    "request": "^2.65.0",
-    "romaji-name": "^0.1.5"
+    "async": "2.5.0",
+    "dirty": "1.1.0",
+    "libxmljs": "0.18.7",
+    "request": "2.83.0",
+    "romaji-name": "0.1.7"
   },
   "devDependencies": {},
   "scripts": {
