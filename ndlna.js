@@ -1,5 +1,6 @@
 var request = require("request");
-var libxmljs = require("libxmljs");
+var {DOMParser} = require("xmldom");
+var xpath = require("xpath");
 var dirty = require("dirty");
 var async = require("async");
 var romajiName = require("romaji-name");
@@ -28,11 +29,9 @@ Record.prototype = {
     parseLabel: function(label) {
         var names = {};
 
-        label.childNodes().forEach(function(node) {
-            var lang = node.attr("lang");
-            lang = lang ? lang.value() : "ja-Kanji";
-
-            var text = node.text().trim();
+        Array.from(label.childNodes).forEach(function(node) {
+            var lang = node.getAttribute && node.getAttribute("lang") || "ja-Kanji";
+            var text = node.textContent.trim();
 
             if (text) {
                 names[lang] = text.split(/, /).slice(0, 2).join(" ")
@@ -74,8 +73,8 @@ Record.prototype = {
             // I hate namespaces
             body = body.replace(/<(\/?)\w+:/g, "<$1");
 
-            var doc = libxmljs.parseXml(body);
-            var prefLabel = doc.get("//prefLabel/Description");
+            var doc = new DOMParser().parseFromString(body);
+            var prefLabel = xpath.select1("//prefLabel/Description", doc);
 
             if (prefLabel) {
                 cache.name = this.name = this.parseLabel(prefLabel);
@@ -83,7 +82,7 @@ Record.prototype = {
 
             cache.aliases = this.aliases = [];
 
-            var altLabels = doc.find("//altLabel/Description");
+            var altLabels = xpath.select("//altLabel/Description", doc);
 
             altLabels.forEach(function(label) {
                 var name = this.parseLabel(label);
@@ -92,18 +91,18 @@ Record.prototype = {
                 }
             }.bind(this));
 
-            var birth = doc.get("//dateOfBirth");
-            var death = doc.get("//dateOfDeath");
+            var birth = xpath.select1("//dateOfBirth", doc);
+            var death = xpath.select1("//dateOfDeath", doc);
 
             if (birth || death) {
                 cache.life = this.life = {};
 
                 if (birth) {
-                    this.life.start = parseFloat(birth.text());
+                    this.life.start = parseFloat(birth.textContent);
                 }
 
                 if (death) {
-                    this.life.end = parseFloat(death.text());
+                    this.life.end = parseFloat(death.textContent);
                 }
             }
 
@@ -160,13 +159,13 @@ Search.prototype = {
 
             if (!err && res.statusCode === 200) {
                 body = body.replace(/xmlns=".*?"/, "");
-                var doc = libxmljs.parseXml(body);
-                var links = doc.find(extractNDLNA);
+                var doc = new DOMParser().parseFromString(body);
+                var links = xpath.select(extractNDLNA, doc);
                 matches = links.map(function(link) {
-                    var url = link.attr("href").value();
+                    var url = link.getAttribute("href");
                     return {
                         id: /\d+/.exec(url)[0],
-                        label: link.text()
+                        label: link.textContent
                     };
                 });
             }
