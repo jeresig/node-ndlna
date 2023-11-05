@@ -1,6 +1,6 @@
 {
   "name": "ndlna",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Resolve names through the National Diet Library's Name Authority.",
   "main": "ndlna.js",
   "dependencies": {
